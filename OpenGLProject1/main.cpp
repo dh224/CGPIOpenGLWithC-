@@ -4,6 +4,8 @@
 #include <string>
 #include <iostream>
 #include <fstream>
+#include "Utils.h"
+
 using namespace std;
 
 #define numVAOs 1
@@ -75,7 +77,7 @@ GLuint createShaderProgram() {
 	GLint fragCompiled;
 	GLint linked;
 
-	string vertShaderStr = readFile("vertShader.glsl");
+	string vertShaderStr = readFile("vertShader2-2.glsl");// vertShader2-1.glsl for P2.1 ; vertShader2-2.glsl for P2.2
 	string fragShaderStr = readFile("fragShader.glsl");
 	const char* vertShaderSrc = vertShaderStr.c_str();
 	const char* fragShaderSrc = fragShaderStr.c_str();
@@ -143,6 +145,21 @@ void display(GLFWwindow* window, double currentTime) {
 	glProgramUniform1f(renderingProgram, offsetLoc, x);
 	glDrawArrays(GL_TRIANGLES, 0, 3);
 }
+//Ï°Ìâ2.1
+void display1(GLFWwindow* window, double currentTime) {
+	glClear(GL_DEPTH_BUFFER_BIT);
+	glClearColor(1.0, 0.0, 0.0, 1.0);
+	glClear(GL_COLOR_BUFFER_BIT);
+	
+	glUseProgram(renderingProgram);
+	x += inc;
+	if (x > 90.0f) inc = -1.0f;
+	if (x < 30.0f) inc = 1.0f;
+	glPointSize(x);
+
+	glDrawArrays(GL_POINTS, 0, 1);
+}
+
 
 int main(void) {
 	if (!glfwInit()) { exit(EXIT_FAILURE); }
@@ -157,7 +174,7 @@ int main(void) {
 	init(window);
 
 	while (!glfwWindowShouldClose(window)) {
-		display(window, glfwGetTime());
+		display(window, glfwGetTime()); //display1() for P2.1
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
