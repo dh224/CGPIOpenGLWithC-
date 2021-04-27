@@ -25,6 +25,7 @@
   <ItemGroup>
     <None Include="fragShader.glsl" />
     <None Include="vertShader.glsl" />
+    <None Include="vertShader3-1.glsl" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Utils.h" />

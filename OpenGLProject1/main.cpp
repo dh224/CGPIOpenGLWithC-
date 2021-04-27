@@ -77,7 +77,7 @@ GLuint createShaderProgram() {
 	GLint fragCompiled;
 	GLint linked;
 
-	string vertShaderStr = readFile("vertShader2-2.glsl");// vertShader2-1.glsl for P2.1 ; vertShader2-2.glsl for P2.2
+	string vertShaderStr = readFile("vertShader3-1.glsl");// vertShader2-1.glsl for P2.1 ; vertShader2-2.glsl for P2.2 ;vertShader3-1.glsl for P3.1
 	string fragShaderStr = readFile("fragShader.glsl");
 	const char* vertShaderSrc = vertShaderStr.c_str();
 	const char* fragShaderSrc = fragShaderStr.c_str();
@@ -160,6 +160,17 @@ void display1(GLFWwindow* window, double currentTime) {
 	glDrawArrays(GL_POINTS, 0, 1);
 }
 
+//习题3.1
+void display2(GLFWwindow* window, double currentTime) {
+	glClear(GL_DEPTH_BUFFER_BIT);
+	glClearColor(0.0, 0.0, 0.0, 1.0);
+	glClear(GL_COLOR_BUFFER_BIT);
+	x = 1.0f; //旋转的角度
+	glUseProgram(renderingProgram);
+	GLuint  xLoc = glGetUniformLocation(renderingProgram, "angle");
+	glProgramUniform1f(renderingProgram, xLoc, x);
+	glDrawArrays(GL_TRIANGLES, 0, 3);
+}
 
 int main(void) {
 	if (!glfwInit()) { exit(EXIT_FAILURE); }
@@ -167,14 +178,14 @@ int main(void) {
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	GLFWwindow* window = glfwCreateWindow(600, 600, "Chapter 2 - program 4", NULL, NULL);
 	glfwMakeContextCurrent(window);
-	glewExperimental = GL_TRUE;//也许是显卡驱动的问题，需要开启GLEW的实验功能才能完全加载其特性
+	glewExperimental = GL_TRUE;//也许是显卡驱动的问题，需要开启GLEW的实验功能才能完全加载其特性，不然会报错
 	if (glewInit() != GLEW_OK) { exit(EXIT_FAILURE); }
 	glfwSwapInterval(1);
 
 	init(window);
 
 	while (!glfwWindowShouldClose(window)) {
-		display(window, glfwGetTime()); //display1() for P2.1
+		display2(window, glfwGetTime()); //display1() for P2.1
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}

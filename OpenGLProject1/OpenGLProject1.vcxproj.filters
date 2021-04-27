@@ -29,6 +29,9 @@
     <None Include="vertShader.glsl">
       <Filter>源文件</Filter>
     </None>
+    <None Include="vertShader3-1.glsl">
+      <Filter>源文件</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Utils.h">
