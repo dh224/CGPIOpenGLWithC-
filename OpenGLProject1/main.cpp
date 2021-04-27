@@ -2,9 +2,10 @@
 #include <GLFW\glfw3.h>
 #include <iostream>
 #include <string>
-#include <iostream>
 #include <fstream>
 #include "Utils.h"
+
+#include<cmath>
 
 using namespace std;
 
@@ -165,7 +166,9 @@ void display2(GLFWwindow* window, double currentTime) {
 	glClear(GL_DEPTH_BUFFER_BIT);
 	glClearColor(0.0, 0.0, 0.0, 1.0);
 	glClear(GL_COLOR_BUFFER_BIT);
-	x = 1.0f; //Ðý×ªµÄ½Ç¶È
+	x += inc;
+	if (x > 90.0f) inc = -0.10f;
+	if (x < 30.0f) inc = 0.10f;
 	glUseProgram(renderingProgram);
 	GLuint  xLoc = glGetUniformLocation(renderingProgram, "angle");
 	glProgramUniform1f(renderingProgram, xLoc, x);
