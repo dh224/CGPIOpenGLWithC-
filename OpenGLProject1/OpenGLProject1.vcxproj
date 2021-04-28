@@ -19,10 +19,15 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="4-1.cpp" />
     <ClCompile Include="Utils.cpp" />
-    <ClCompile Include="main.cpp" />
+    <ClCompile Include="main.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <None Include="fragShader4-1.glsl" />
+    <None Include="verShader4-1.glsl" />
     <None Include="fragShader.glsl" />
     <None Include="vertShader.glsl" />
     <None Include="vertShader3-1.glsl" />
