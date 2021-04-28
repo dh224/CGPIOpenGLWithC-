@@ -26,7 +26,7 @@ GLuint vbo[numVBOs];
 GLuint mvLoc, projLoc;
 int width, height;
 float aspect;
-glm::mat4 pMat, vMat, mMat, mvMat;
+glm::mat4 pMat, vMat, mMat, mvMat,rMat,tMat;// r,tMat用于旋转 动画
 
 
 void setupVertices(void) { //36个顶点，12个三角形，组成了放置在远点的2*2*2的立方体
@@ -65,6 +65,7 @@ void init(GLFWwindow* window) {
 
 void display(GLFWwindow* window, double currentTime) {
 	glClear(GL_DEPTH_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT);
 	glUseProgram(renderingProgram);
 
 
@@ -75,11 +76,17 @@ void display(GLFWwindow* window, double currentTime) {
 	glfwGetFramebufferSize(window, &width, &height);
 	aspect = (float)width / (float)height;
 
+	//旋转动画所需的
+	tMat = glm::translate(glm::mat4(1.0f), glm::vec3(sin(0.35f * currentTime) * 2, cos(0.52f * currentTime) * 2.0f, sin(0.7f * currentTime) * 2.0f));
 	//构建project矩阵
 	pMat = glm::perspective(1.0472f, aspect, 0.1f, 1000.0f); // 1.0472为60度的弧度值
 	//构建ModelView矩阵
 	vMat = glm::translate(glm::mat4(1.0f), glm::vec3(-cameraX, -cameraY, -cameraZ));
 	mMat = glm::translate(glm::mat4(1.0f), glm::vec3(cubeLocX, cubeLocY, cubeLocZ));
+	rMat = glm::rotate(glm::mat4(1.0f), 1.75f * (float)currentTime, glm::vec3(0.0f, 1.0f, 0.0f));
+	rMat = glm::rotate(rMat,1.75f * (float)currentTime, glm::vec3(1.0f,0.0f,0.0f));
+	rMat = glm::rotate(rMat, 1.75f * (float)currentTime, glm::vec3(0.0f, 0.0f, 1.0f));
+	mMat = tMat * rMat;
 	mvMat = vMat * mMat;
 
 	//将project矩阵和MV矩阵赋值
