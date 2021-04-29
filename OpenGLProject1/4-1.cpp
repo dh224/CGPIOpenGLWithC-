@@ -8,6 +8,7 @@
 #include <glm\gtc\type_ptr.hpp> // glm::value_ptr
 #include <glm\gtc\matrix_transform.hpp> // glm::translate, glm::rotate, glm::scale, glm::perspective
 #include "Utils.h"
+#include <stack>
 using namespace std;
 
 #define numVAOs 1
@@ -28,7 +29,7 @@ GLuint mvLoc, projLoc,vLoc ;
 int width, height;
 float aspect;
 glm::mat4 pMat, vMat, mMat, mvMat,rMat,tMat;// r,tMat用于旋转 动画
-
+stack<glm::mat4> mvStack;
 
 void setupVertices(void) { 
 	//36个顶点，12个三角形，组成了放置在远点的2*2*2的立方体
@@ -69,14 +70,17 @@ void setupVertices(void) {
 
 void init(GLFWwindow* window) {
 	renderingProgram = Utils::createShaderProgram("vertShader4-7.glsl", "fragShader4-1.glsl");
-	cameraX = 0.0f; cameraY = 0.0f; cameraZ = 8.0f;
+	cameraX = 0.0f; cameraY = 0.0f; cameraZ = 12.0f;
 	cubeLocX = 0.0f; cubeLocY = -2.0f; cubeLocZ = 0.0f;
-	pyrLocX = 2.0f; pyrLocY = 2.0f; pyrLocZ = 1.0f;
+	pyrLocX = 0.0f; pyrLocY = 0.0f; pyrLocZ = 0.0f;
 
 	setupVertices();
 }
 
+
 void display(GLFWwindow* window, double currentTime) {
+
+
 	glClear(GL_DEPTH_BUFFER_BIT);
 	glClearColor(0.0, 0.0, 0.0, 1.0);
 	glClear(GL_COLOR_BUFFER_BIT);
@@ -92,9 +96,53 @@ void display(GLFWwindow* window, double currentTime) {
 	aspect = (float)width / (float)height;
 	pMat = glm::perspective(1.0472f, aspect, 0.1f, 1000.0f); // 1.0472为60度的弧度值
 	projLoc = glGetUniformLocation(renderingProgram, "proj_matrix");
+	glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(pMat));
+
 	vMat = glm::translate(glm::mat4(1.0f), glm::vec3(-cameraX, -cameraY, -cameraZ));
-	mMat = glm::translate(glm::mat4(1.0f), glm::vec3(cubeLocX, cubeLocY, cubeLocZ));
-	mvMat = vMat * mMat;
+	mvStack.push(vMat);
+	//金字塔部分
+	mvStack.push(mvStack.top());
+	mvStack.top() *= glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));//固定金字塔（太阳）的位置
+	mvStack.push(mvStack.top());
+	mvStack.top() *= glm::rotate(glm::mat4(1.0f), (float)currentTime,glm::vec3(1.0f,0.0f,0.0f));//确定金字塔的旋转
+
+	glUniformMatrix4fv(mvLoc, 1, GL_FALSE, glm::value_ptr(mvStack.top()));
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	glEnableVertexAttribArray(0);
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_LEQUAL);
+	glDrawArrays(GL_TRIANGLES, 0, 18);
+	mvStack.pop();//移除金字塔的旋转
+	//立方体——行星部分
+	mvStack.push(mvStack.top());
+	mvStack.top() *= glm::translate(glm::mat4(1.0f), glm::vec3(sin((float)currentTime) * 4.0,0.0f, cos((float)currentTime) * 4.0));//确立行星位置
+	mvStack.push(mvStack.top());
+	mvStack.top() *= glm::rotate(glm::mat4(1.0f), (float)currentTime, glm::vec3(0.0f, 1.0f, 0.0f));//确定行星的旋转
+	glUniformMatrix4fv(mvLoc, 1, GL_FALSE, glm::value_ptr(mvStack.top()));
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	glEnableVertexAttribArray(0);
+	glDrawArrays(GL_TRIANGLES, 0, 36);
+	mvStack.pop();//移除行星的旋转
+	//立方体——月球
+	mvStack.push(mvStack.top());
+	mvStack.top() *= glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, sin((float)currentTime) * 2.0, cos((float)currentTime) * 2.0));//确立月球位置
+	mvStack.top() *= glm::rotate(glm::mat4(1.0f), (float)currentTime, glm::vec3(0.0f, 0.0f, 1.0f));//确定月球的旋转
+	mvStack.top() *= glm::scale(glm::mat4(1.0f),glm::vec3(0.25,0.25,0.25));//让月球更像月球
+	glUniformMatrix4fv(mvLoc, 1, GL_FALSE, glm::value_ptr(mvStack.top()));
+
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	glEnableVertexAttribArray(0);
+	glDrawArrays(GL_TRIANGLES, 0, 36);
+
+	mvStack.pop();
+	mvStack.pop();
+	mvStack.pop();
+	mvStack.pop();//清空
+	//mMat = glm::translate(glm::mat4(1.0f), glm::vec3(cubeLocX, cubeLocY, cubeLocZ));
+	//mvMat = vMat * mMat;
 
 
 
@@ -103,33 +151,26 @@ void display(GLFWwindow* window, double currentTime) {
 	//tfLoc = glGetUniformLocation(renderingProgram, "tf");
 	//glUniform1f(tfLoc, (float)tf);
 
-	glUniformMatrix4fv(mvLoc, 1, GL_FALSE, glm::value_ptr(mvMat));
-	glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(pMat));
 
-	//将VBO关联到顶点着色器中
-	glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);//将第0个缓冲区标记为活跃
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);//将第0个属性关联到缓冲区
-	glEnableVertexAttribArray(0);//启用第0个顶点属性
+	////将VBO关联到顶点着色器中
+	//glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);//将第0个缓冲区标记为活跃
+	//glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);//将第0个属性关联到缓冲区
+	//glEnableVertexAttribArray(0);//启用第0个顶点属性
 
-	glEnable(GL_DEPTH_TEST);//调整OpenGL设置，绘制模型
-	glDepthFunc(GL_LEQUAL);
-	glDrawArrays(GL_TRIANGLES, 0, 36);	// 0, 36, 24  (or 100000)	
+	//glEnable(GL_DEPTH_TEST);//调整OpenGL设置，绘制模型
+	//glDepthFunc(GL_LEQUAL);
+	//glDrawArrays(GL_TRIANGLES, 0, 36);	// 0, 36, 24  (or 100000)	
 
 		// draw the pyramid using buffer #1
-	mMat = glm::translate(glm::mat4(1.0f), glm::vec3(pyrLocX, pyrLocY, pyrLocZ));
-	mvMat = vMat * mMat;
+	//mMat = glm::translate(glm::mat4(1.0f), glm::vec3(pyrLocX, pyrLocY, pyrLocZ));
+	//mvMat = vMat * mMat;
 
-	glUniformMatrix4fv(mvLoc, 1, GL_FALSE, glm::value_ptr(mvMat));
-	glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(pMat));
 
-	glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-	glEnableVertexAttribArray(0);
+	//glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
+	//glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	//glEnableVertexAttribArray(0);
 
-	glEnable(GL_DEPTH_TEST);
-	glDepthFunc(GL_LEQUAL);
 
-	glDrawArrays(GL_TRIANGLES, 0, 18);
 }
 
 
