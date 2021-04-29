@@ -75,6 +75,11 @@ void init(GLFWwindow* window) {
 	pyrLocX = 0.0f; pyrLocY = 0.0f; pyrLocZ = 0.0f;
 
 	setupVertices();
+	glfwGetFramebufferSize(window, &width, &height);
+	aspect = (float)width / (float)height;
+	pMat = glm::perspective(1.0472f, aspect, 0.1f, 1000.0f); // 1.0472为60度的弧度值  我懂了，这其实就是定义了 Near far 面
+
+	
 }
 
 
@@ -85,16 +90,13 @@ void display(GLFWwindow* window, double currentTime) {
 	glClearColor(0.0, 0.0, 0.0, 1.0);
 	glClear(GL_COLOR_BUFFER_BIT);
 	glUseProgram(renderingProgram);
-
+	glEnable(GL_CULL_FACE);
 
 	// 获取ModelView矩阵和project矩阵的统一变量
 	mvLoc = glGetUniformLocation(renderingProgram, "mv_matrix");
 
 	//vLoc = glGetUniformLocation(renderingProgram, "v_matrix");
-	glfwGetFramebufferSize(window, &width, &height);
 
-	aspect = (float)width / (float)height;
-	pMat = glm::perspective(1.0472f, aspect, 0.1f, 1000.0f); // 1.0472为60度的弧度值
 	projLoc = glGetUniformLocation(renderingProgram, "proj_matrix");
 	glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(pMat));
 
@@ -112,6 +114,7 @@ void display(GLFWwindow* window, double currentTime) {
 	glEnableVertexAttribArray(0);
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_LEQUAL);
+	glFrontFace(GL_CCW);
 	glDrawArrays(GL_TRIANGLES, 0, 18);
 	mvStack.pop();//移除金字塔的旋转
 	//立方体——行星部分
@@ -123,6 +126,7 @@ void display(GLFWwindow* window, double currentTime) {
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
 	glEnableVertexAttribArray(0);
+	glFrontFace(GL_CW);
 	glDrawArrays(GL_TRIANGLES, 0, 36);
 	mvStack.pop();//移除行星的旋转
 	//立方体——月球
@@ -135,6 +139,7 @@ void display(GLFWwindow* window, double currentTime) {
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
 	glEnableVertexAttribArray(0);
+	glFrontFace(GL_CW);
 	glDrawArrays(GL_TRIANGLES, 0, 36);
 
 	mvStack.pop();
@@ -172,13 +177,19 @@ void display(GLFWwindow* window, double currentTime) {
 
 
 }
+void window_reshape_callback(GLFWwindow * window,int newWidth,int newHeight) {
+	aspect = (float)newWidth / (float)newHeight;
+	glViewport(0, 0, newWidth, newHeight);
 
+	pMat = glm::perspective(1.0472f, aspect, 0.1f, 1000.0f); //
+}
 
 int main(void) {
 	if (!glfwInit()) { exit(EXIT_FAILURE); }
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	GLFWwindow* window = glfwCreateWindow(600, 600, "Chapter 4 - program 1", NULL, NULL);
+	glfwSetWindowSizeCallback(window, window_reshape_callback);
 	glfwMakeContextCurrent(window);
 	glewExperimental = GL_TRUE;//也许是显卡驱动的问题，需要开启GLEW的实验功能才能完全加载其特性，不然会报错
 
