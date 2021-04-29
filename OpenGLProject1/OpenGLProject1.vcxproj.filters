@@ -24,6 +24,9 @@
     <ClCompile Include="4-1.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="5-1.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="fragShader.glsl">
@@ -42,6 +45,12 @@
       <Filter>源文件</Filter>
     </None>
     <None Include="vertShader4-7.glsl">
+      <Filter>源文件</Filter>
+    </None>
+    <None Include="vertShader5-1.glsl">
+      <Filter>源文件</Filter>
+    </None>
+    <None Include="fragShader5-1.glsl">
       <Filter>源文件</Filter>
     </None>
   </ItemGroup>
