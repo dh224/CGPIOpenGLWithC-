@@ -21,9 +21,10 @@ float cubeLocX, cubeLocY, cubeLocZ;
 GLuint renderingProgram;
 GLuint vao[numVAOs];
 GLuint vbo[numVBOs];
-
+GLuint tfLoc;
+float tf; //time factor
 //分配在display()中所需要的变量的空间，这样就不需要多次分配空间了。
-GLuint mvLoc, projLoc;
+GLuint mvLoc, projLoc,vLoc;
 int width, height;
 float aspect;
 glm::mat4 pMat, vMat, mMat, mvMat,rMat,tMat;// r,tMat用于旋转 动画
@@ -58,39 +59,38 @@ void setupVertices(void) { //36个顶点，12个三角形，组成了放置在远点的2*2*2的立方
 
 void init(GLFWwindow* window) {
 	renderingProgram = Utils::createShaderProgram("verShader4-1.glsl", "fragShader4-1.glsl");
-	cameraX = 0.0f; cameraY = 0.0f; cameraZ = 8.0f;
+	cameraX = 0.0f; cameraY = 0.0f; cameraZ = 420.0f;
 	cubeLocX = 0.0f; cubeLocY = -2.0f; cubeLocZ = 0.0f;
+	glfwGetFramebufferSize(window, &width, &height);
+
+	aspect = (float)width / (float)height;
+	pMat = glm::perspective(1.0472f, aspect, 0.1f, 1000.0f); // 1.0472为60度的弧度值
+
 	setupVertices();
 }
 
 void display(GLFWwindow* window, double currentTime) {
 	glClear(GL_DEPTH_BUFFER_BIT);
+	glClearColor(0.0, 0.0, 0.0, 1.0);
 	glClear(GL_COLOR_BUFFER_BIT);
 	glUseProgram(renderingProgram);
 
 
 	// 获取ModelView矩阵和project矩阵的统一变量
-	mvLoc = glGetUniformLocation(renderingProgram, "mv_matrix");
+	//mvLoc = glGetUniformLocation(renderingProgram, "mv_matrix");
+	vLoc = glGetUniformLocation(renderingProgram, "v_matrix");
 	projLoc = glGetUniformLocation(renderingProgram, "proj_matrix");
-
-	glfwGetFramebufferSize(window, &width, &height);
-	aspect = (float)width / (float)height;
-
-	//旋转动画所需的
-	tMat = glm::translate(glm::mat4(1.0f), glm::vec3(sin(0.35f * currentTime) * 2, cos(0.52f * currentTime) * 2.0f, sin(0.7f * currentTime) * 2.0f));
-	//构建project矩阵
-	pMat = glm::perspective(1.0472f, aspect, 0.1f, 1000.0f); // 1.0472为60度的弧度值
-	//构建ModelView矩阵
 	vMat = glm::translate(glm::mat4(1.0f), glm::vec3(-cameraX, -cameraY, -cameraZ));
-	mMat = glm::translate(glm::mat4(1.0f), glm::vec3(cubeLocX, cubeLocY, cubeLocZ));
-	rMat = glm::rotate(glm::mat4(1.0f), 1.75f * (float)currentTime, glm::vec3(0.0f, 1.0f, 0.0f));
-	rMat = glm::rotate(rMat,1.75f * (float)currentTime, glm::vec3(1.0f,0.0f,0.0f));
-	rMat = glm::rotate(rMat, 1.75f * (float)currentTime, glm::vec3(0.0f, 0.0f, 1.0f));
-	mMat = tMat * rMat;
-	mvMat = vMat * mMat;
 
-	//将project矩阵和MV矩阵赋值
-	glUniformMatrix4fv(mvLoc, 1, GL_FALSE, glm::value_ptr(mvMat));
+
+
+
+	tf = ((float)currentTime);
+	tfLoc = glGetUniformLocation(renderingProgram, "tf");
+	glUniform1f(tfLoc, (float)tf);
+
+
+	glUniformMatrix4fv(vLoc, 1, GL_FALSE, glm::value_ptr(vMat));
 	glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(pMat));
 
 	//将VBO关联到顶点着色器中
@@ -100,7 +100,7 @@ void display(GLFWwindow* window, double currentTime) {
 
 	glEnable(GL_DEPTH_TEST);//调整OpenGL设置，绘制模型
 	glDepthFunc(GL_LEQUAL);
-	glDrawArrays(GL_TRIANGLES, 0, 36);
+	glDrawArraysInstanced(GL_TRIANGLES, 0, 36, 100000);	// 0, 36, 24  (or 100000)	
 }
 
 
