@@ -22,7 +22,11 @@
     <ClCompile Include="4-1.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="5-1.cpp" />
+    <ClCompile Include="5-1.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="6-1.cpp" />
+    <ClCompile Include="Sphere.cpp" />
     <ClCompile Include="Utils.cpp" />
     <ClCompile Include="main.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
@@ -31,14 +35,17 @@
   <ItemGroup>
     <None Include="fragShader4-1.glsl" />
     <None Include="fragShader5-1.glsl" />
+    <None Include="fragShader6-1.glsl" />
     <None Include="verShader4-1.glsl" />
     <None Include="fragShader.glsl" />
     <None Include="vertShader.glsl" />
     <None Include="vertShader3-1.glsl" />
     <None Include="vertShader4-7.glsl" />
     <None Include="vertShader5-1.glsl" />
+    <None Include="vertShader6-1.glsl" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Sphere.h" />
     <ClInclude Include="Utils.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

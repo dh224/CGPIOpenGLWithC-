@@ -27,6 +27,12 @@
     <ClCompile Include="5-1.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="Sphere.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="6-1.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="fragShader.glsl">
@@ -53,9 +59,18 @@
     <None Include="fragShader5-1.glsl">
       <Filter>源文件</Filter>
     </None>
+    <None Include="vertShader6-1.glsl">
+      <Filter>源文件</Filter>
+    </None>
+    <None Include="fragShader6-1.glsl">
+      <Filter>源文件</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Utils.h">
+      <Filter>源文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Sphere.h">
       <Filter>源文件</Filter>
     </ClInclude>
   </ItemGroup>
