@@ -164,7 +164,7 @@ void window_reshape_callback(GLFWwindow* window, int newWidth, int newHeight) {
 	aspect = (float)newWidth / (float)newHeight;
 	glViewport(0, 0, newWidth, newHeight);
 
-	pMat = glm::perspective(1.0472f, aspect, 0.1f, 1000.0f); //
+	pMat = glm::perspective(1.0472f, aspect, 0.1f, 1000.0f); //Õ∏ ”Õ∂”∞
 }
 
 int main(void) {
